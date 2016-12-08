@@ -1,32 +1,6 @@
-import cPickle as pickle
 import numpy as np
-import os
 import tensorflow as tf
-
-
-def load_CIFAR_batch(filename):
-    with open(filename, 'rb') as f:
-        datadict = pickle.load(f)
-        X = datadict['data']
-        Y = datadict['labels']
-        X = X.reshape(10000, 3, 32, 32).transpose(0, 2, 3, 1).astype("float")
-        Y = np.array(Y)
-        return X, Y
-
-
-def load_CIFAR10(ROOT):
-    xs = []
-    ys = []
-    for b in range(1, 6):
-        f = os.path.join(ROOT, 'data_batch_%d' % (b,))
-        X, Y = load_CIFAR_batch(f)
-        xs.append(X)
-        ys.append(Y)
-    Xtr = np.concatenate(xs)
-    Ytr = np.concatenate(ys)
-    del X, Y
-    Xte, Yte = load_CIFAR_batch(os.path.join(ROOT, 'test_batch'))
-    return Xtr, Ytr, Xte, Yte
+import dataset_util
 
 
 def softmax_classifier(x_tr, y_tr, x_te, y_te):
@@ -46,7 +20,7 @@ def softmax_classifier(x_tr, y_tr, x_te, y_te):
         tf.summary.scalar('cross_entropy', cross_entropy)
 
     with tf.name_scope('train_step'):
-        train_step = tf.train.AdamOptimizer(0.000001).minimize(cross_entropy)
+        train_step = tf.train.AdamOptimizer(0.00001).minimize(cross_entropy)
 
     sess = tf.Session()
     init = tf.global_variables_initializer()
@@ -88,7 +62,7 @@ def softmax_classifier(x_tr, y_tr, x_te, y_te):
     print "Test accuracy\t:\t", (sess.run(accuracy, feed_dict={x: x_te, y_: y_te})) * 100, "%"
 
 
-x_tr, y_tr, x_te, y_te = load_CIFAR10('dataset_pickle')
+x_tr, y_tr, x_te, y_te = dataset_util.load_CIFAR10('dataset_pickle')
 
 x_tr = np.reshape(x_tr, (x_tr.shape[0], -1))
 x_te = np.reshape(x_te, (x_te.shape[0], -1))
