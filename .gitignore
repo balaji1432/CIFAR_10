@@ -24,3 +24,5 @@ dataset_pickle/data_batch_4
 dataset_pickle/data_batch_5
 
 dataset_pickle/test_batch
+
+*.pyc
